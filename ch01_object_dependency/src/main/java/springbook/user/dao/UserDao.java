@@ -8,17 +8,22 @@ import springbook.user.domain.User;
 
 /**
  * JDBC를 이용한 등록과 조회 기능이 있는 UserDao 클래스
- * DAO의 확장 -> 클래스 분리
- * 1-6 독립된 SimpleConnectionMaker를 사용하게 만든 UserDao
+ * 인터페이스를 도입
+ * 1-10 ConnectionMaker 인터페이스를 사용하여 개선한 UserDao
  */
 public class UserDao {
 	
-	private SimpleConnectionMaker simpleConnectionMaker;
-		
+	private ConnectionMaker connectionMaker; // 인터페이스를 통해 오브젝트에 접근하므로 구체적인 클래스 정보를 알 필요가 없다.
+	
+	// 생성자 메소드
+	public UserDao() {
+		connectionMaker = new DConnectionMaker(); // 앗! 근데 여기에는 클래스 이름이 나오네요!!
+	}
+	
 	// 사용자 데이터 추가
 	public void add(User user) throws ClassNotFoundException, SQLException {
 		
-		Connection c = simpleConnectionMaker.makeNewConnection();
+		Connection c = connectionMaker.makeConnection(); // 인터페이스에 정의된 메소드를 사용하므로 클래스가 바뀐다고 해도 메소드 이름이 변경될 걱정은 없다.
 		
 		//2. SQL을 담은 Statement 또는 PreparedStatement 를 만든다.
 		PreparedStatement ps = c.prepareStatement(
@@ -38,7 +43,7 @@ public class UserDao {
 	// 사용자 데이터 가져오기
 	public User get(String id) throws ClassNotFoundException, SQLException {
 
-		Connection c = simpleConnectionMaker.makeNewConnection();
+		Connection c = connectionMaker.makeConnection(); // 인터페이스에 정의된 메소드를 사용하므로 클래스가 바뀐다고 해도 메소드 이름이 변경될 걱정은 없다.
 		
 		// 2. SQL을 담은 Statement 또는 PreparedStatement 를 만든다.
 		PreparedStatement ps = c.prepareStatement(
