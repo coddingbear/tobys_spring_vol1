@@ -8,16 +8,16 @@ import springbook.user.domain.User;
 
 /**
  * JDBC를 이용한 등록과 조회 기능이 있는 UserDao 클래스
- * 인터페이스를 도입
+ * 인터페이스를 도입 -> 다른 관심을 분리해서 클라이언트에게 넘기기
  * 1-10 ConnectionMaker 인터페이스를 사용하여 개선한 UserDao
  */
 public class UserDao {
 	
 	private ConnectionMaker connectionMaker; // 인터페이스를 통해 오브젝트에 접근하므로 구체적인 클래스 정보를 알 필요가 없다.
 	
-	// 생성자 메소드
-	public UserDao() {
-		connectionMaker = new DConnectionMaker(); // 앗! 근데 여기에는 클래스 이름이 나오네요!!
+	// 1-11 수정한 생성자 - 외부에서 객체 주입
+	public UserDao(ConnectionMaker connectionMaker) {
+		this.connectionMaker = connectionMaker;
 	}
 	
 	// 사용자 데이터 추가
