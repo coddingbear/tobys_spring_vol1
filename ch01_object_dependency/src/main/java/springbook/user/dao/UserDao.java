@@ -8,13 +8,14 @@ import springbook.user.domain.User;
 
 /**
  * JDBC를 이용한 등록과 조회 기능이 있는 UserDao 클래스
- * 1-23 인스턴스 변수를 사용하도록 수정한 UserDao
+ * 1-25 의존관계 주입을 위한 코드
  */
 public class UserDao {
-	private ConnectionMaker connectionMaker; // 초기에 설정하면 사용 중에는 바뀌지 않는 읽기전용 인스턴스 변수
-	private Connection c;  // 메번 새로운 값으로 바뀌는 정보를 담은 인스턴스 변수
+	private ConnectionMaker connectionMaker; //인터페이스를 통한 느슨한 결합
+	private Connection c;
 	private User user;
 	
+	// 의존관계 주입(DI)
 	public UserDao(ConnectionMaker connectionMaker) {
 		this.connectionMaker = connectionMaker;
 	}
