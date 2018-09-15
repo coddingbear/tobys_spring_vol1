@@ -8,17 +8,17 @@ import springbook.user.domain.User;
 
 /**
  * JDBC를 이용한 등록과 조회 기능이 있는 UserDao 클래스
- * 1-25 의존관계 주입을 위한 코드
+ * 메소드를 이용한 의존관계 주입
+ * 1-33 수정자 메소드 DI 방식을 사용한 UserDao
  */
 public class UserDao {
-	private ConnectionMaker connectionMaker; //인터페이스를 통한 느슨한 결합
 	private Connection c;
-	private User user;
-	
-	// 의존관계 주입(DI)
-	public UserDao(ConnectionMaker connectionMaker) {
+	private ConnectionMaker connectionMaker;
+		
+	// setter 메소드를 이용한 의존관계 주입(DI)
+	public void setConnectionMaker(ConnectionMaker connectionMaker) {
 		this.connectionMaker = connectionMaker;
-	}
+	} // 수정자 메소드 DI의 전형적인 코드다. 잘 기억해두자. setter 메소드는 보통 IDE의 자동생성 기능을 사용해서 만드는 것이 편리하다.
 	
 	// 사용자 데이터 추가
 	public void add(User user) throws ClassNotFoundException, SQLException {
@@ -54,15 +54,15 @@ public class UserDao {
 		// 실행 결과를 ResultSet으로 받아서 정보를 저장할  오브젝트에 옮긴다.
 		ResultSet rs = ps.executeQuery();
 		rs.next();
-		this.user = new User();
-		this.user.setId(rs.getString("id"));
-		this.user.setName(rs.getString("name"));
-		this.user.setPassword(rs.getString("password"));
+		User user = new User();
+		user.setId(rs.getString("id"));
+		user.setName(rs.getString("name"));
+		user.setPassword(rs.getString("password"));
 		
 		// 4. 작업중에 생성된 Connection, Statement, ResultSet 리소스를 닫아 준다.
 		rs.close();
 		ps.close();
 		c.close();
-		return this.user;
+		return user;
 	}
 }
