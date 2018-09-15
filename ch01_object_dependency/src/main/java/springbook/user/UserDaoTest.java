@@ -3,6 +3,7 @@ package springbook.user;
 import java.sql.SQLException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.support.GenericXmlApplicationContext;
 import springbook.user.dao.DaoFactory;
 import springbook.user.dao.UserDao;
 import springbook.user.domain.User;
@@ -15,13 +16,15 @@ import springbook.user.domain.User;
  */
 public class UserDaoTest {
 	public static void main(String[] args) throws ClassNotFoundException, SQLException {
-		
+		/*ApplicationContext context = 
+				new AnnotationConfigApplicationContext(DaoFactory.class);*/
+		// XML을 이용한 애플리케이션 컨텍스트
 		ApplicationContext context = 
-				new AnnotationConfigApplicationContext(DaoFactory.class);
+				new GenericXmlApplicationContext("classpath:applicationContext.xml");
 		UserDao dao = context.getBean("userDao", UserDao.class);
 		
 		User user = new User();
-		user.setId("whiteship");
+		user.setId("whiteship12");
 		user.setName("백기선");
 		user.setPassword("married");
 		
