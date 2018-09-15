@@ -20,6 +20,22 @@ public class UserApp {
 				new AnnotationConfigApplicationContext(DaoFactory.class);
 		UserDao dao = context.getBean("userDao", UserDao.class);
 		
+		// 1-20 직접 생성한 DaoFactory 오브젝트 출력 코드
+		DaoFactory factory = new DaoFactory();
+		UserDao dao1 = factory.userDao();
+		UserDao dao2 = factory.userDao();
+		// userDao를 매번 호출하면 새로운 오브젝트가 생성도니다.
+		System.out.println(dao1);
+		System.out.println(dao2);
+		
+		// 1-21 스프링 컨텍스트로부터 가져온 오브젝트 출력 코드
+		UserDao dao3 = context.getBean("userDao", UserDao.class);
+		UserDao dao4 = context.getBean("userDao", UserDao.class);
+		// 스프링은 여러번에 걸쳐 빈을 요청하더라도 매번 동일한 오프젝트를 반환한다.
+		System.out.println(dao3);
+		System.out.println(dao4);
+		
+		/*
 		User user = new User();
 		user.setId("whiteship");
 		user.setName("백기선");
@@ -34,5 +50,7 @@ public class UserApp {
 		System.out.println(user2.getPassword());
 		
 		System.out.println(user2.getId() + "조회 성공");
+		*/
+		
 	}
 }
