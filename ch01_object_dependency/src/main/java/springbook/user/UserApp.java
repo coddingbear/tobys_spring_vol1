@@ -1,6 +1,8 @@
 package springbook.user;
 
 import java.sql.SQLException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import springbook.user.dao.DaoFactory;
 import springbook.user.dao.UserDao;
 import springbook.user.domain.User;
@@ -9,12 +11,14 @@ import springbook.user.domain.User;
  * UserDao 클라이언트 메인 테스트 
  * @author CodingBear
  * 
- * 1-15 팩토리를 사용하도록 수정한 UserApp
+ * 1-19 애플리케이션 컨텍스트를 적용한 UserApp(UserDaoTest)
  */
 public class UserApp {
 	public static void main(String[] args) throws ClassNotFoundException, SQLException {
 		
-		UserDao dao = new DaoFactory().userDao();
+		ApplicationContext context = 
+				new AnnotationConfigApplicationContext(DaoFactory.class);
+		UserDao dao = context.getBean("userDao", UserDao.class);
 		
 		User user = new User();
 		user.setId("whiteship");
