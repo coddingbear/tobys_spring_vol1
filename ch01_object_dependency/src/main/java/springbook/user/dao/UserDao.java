@@ -8,17 +8,29 @@ import springbook.user.domain.User;
 
 /**
  * JDBC를 이용한 등록과 조회 기능이 있는 UserDao 클래스
- * 인터페이스를 도입 -> 다른 관심을 분리해서 클라이언트에게 넘기기
- * 1-10 ConnectionMaker 인터페이스를 사용하여 개선한 UserDao
+ * 싱글톤 패턴(singleton pattern)의 한계
+ * 1-22 싱글톤 패턴을 적용한 UserDao
  */
 public class UserDao {
+	private static UserDao INSTANCE;
 	
 	private ConnectionMaker connectionMaker; // 인터페이스를 통해 오브젝트에 접근하므로 구체적인 클래스 정보를 알 필요가 없다.
 	
-	// 1-11 수정한 생성자 - 외부에서 객체 주입
-	public UserDao(ConnectionMaker connectionMaker) {
+	// 싱글톤을 적용하기 위해 생성자의 접근권한을 private 선언
+	private UserDao(ConnectionMaker connectionMaker) {
 		this.connectionMaker = connectionMaker;
 	}
+	
+	public static synchronized UserDao getInstance(ConnectionMaker connectionMaker) {
+		if(INSTANCE == null) INSTANCE = new UserDao(connectionMaker);
+		return INSTANCE;
+	}
+	/* 싱글톤 단점:
+	 * - private 생성자를 갖고 있기 때문에 상속할 수 없다.
+	 * - 싱글톤은 테스트하기가 힘들다.
+	 * - 서버환경에서 싱글톤이 하나만 만들어지는 것을 보장하지 못한다.
+	 * - 싱글콩의 사용은 전역 상태를 만들 수 있기 때문에 바람직 하지 못하다.
+	 */
 	
 	// 사용자 데이터 추가
 	public void add(User user) throws ClassNotFoundException, SQLException {
