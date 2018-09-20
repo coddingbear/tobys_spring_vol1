@@ -28,6 +28,11 @@
     	<artifactId>spring-jdbc</artifactId>
     	<version>${springframework.version}</version>
     </dependency>
+    <dependency>
+    	<groupId>org.springframework</groupId>
+    	<artifactId>spring-test</artifactId>
+    	<version>${springframework.version}</version>
+    </dependency>
   	
     <!-- MySQL JDBC 컨넥터 -->
     <dependency>

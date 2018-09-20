@@ -5,26 +5,37 @@ import static org.junit.Assert.assertThat;
 import java.sql.SQLException;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import springbook.user.dao.UserDao;
 import springbook.user.domain.User;
 
 /**
- * 2-15 중복 코드를 제거한 UserDaoTest
- * 2-16 User 픽스처를 적용한 UserDaoTest
+ * 2-17 스프링 텍스트 컨텍스트를 적용한 UserDaoTest
  */
+@RunWith(SpringJUnit4ClassRunner.class) // 스프링의 테스트 컨텍스트 프레임워크의 JUnit 확장기능 지정
+@ContextConfiguration(locations="/applicationContext.xml") // 테스트 컨텍스트가 자동으로 만들어줄 애플리케이션 컨텍스트의 위치 지정
 public class UserDaoTest {
-	private UserDao dao; // setUp() 메소드에서 만드는 오브젝트를 테스트 메소드에서 사용할 수 있도록 인스턴스 변수로 선언한다.
+	
+	@Autowired
+	private ApplicationContext context; // 테스트 오브젝트가 만들어지고 나면 스프링 테스트 컨텍스트에 의해 자동으로 값이 주입된다.
+	
+	private UserDao dao;
 	private User user1;
 	private User user2;
 	private User user3;
 	
 	@Before // JUnit이 제공하는 애노테이션 @Test 메소드가 실행되기 전에 먼저 실행되야 하는 메소드를 정의한다.
 	public void setUp() {
-		ApplicationContext context = new GenericXmlApplicationContext("classpath:applicationContext.xml");
-		this.dao = context.getBean("userDao", UserDao.class);
+		// 2-18 확인용 코드 추가
+		System.out.println(this.context);
+		System.out.println(this);
+		
+		this.dao = this.context.getBean("userDao", UserDao.class);
 		
 		this.user1 = new User("gyumee", "박성철", "springno1");
 		this.user2 = new User("leegw700", "이길원", "springno2");
