@@ -21,23 +21,23 @@ public class UserDao {
 		this.dataSource = dataSource;
 	}
 	
-	// 3-17 add() 메소드의 로컬 변수를 직접 사용하도록 수정한 AddStatement
+	// 3-18 AddStatement를 익명 내부 클래스로 전환
+	// 3-19 메소드 파라미터로 이전한 익명 내부 클래스
 	public void add(final User user) throws SQLException {
-		class AddStatement implements StatementStrategy { // add() 메소드 내부에 선언된 로컬 클래스다.
-			@Override
-			public PreparedStatement makePreparedStatement(Connection c) 
-					throws SQLException {
-				PreparedStatement ps = c.prepareStatement(
-						"INSERT INTO users (id, name, password) VALUES (?,?,?)");
-				ps.setString(1, user.getId()); // 로컬 클래스의 코드에서 외부의 메소드 로컬변수를 직접 접근할 수 있다.
-				ps.setString(2, user.getName());
-				ps.setString(3, user.getPassword());
-				
-				return ps;
+		jdbcContextWithStatementStrategy(
+			new StatementStrategy() { // 익명 내부 클래스는 구현하는 인터페이스를 생성자처럼 이용해서 오브젝트를 만든다.
+				@Override
+				public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
+					PreparedStatement ps = c.prepareStatement(
+							"INSERT INTO users (id, name, password) VALUES (?,?,?)");
+					ps.setString(1, user.getId()); // 로컬 클래스의 코드에서 외부의 메소드 로컬변수를 직접 접근할 수 있다.
+					ps.setString(2, user.getName());
+					ps.setString(3, user.getPassword());
+					
+					return ps;
+				}
 			}
-		}
-		StatementStrategy st = new AddStatement(); // 생성자 파라미터로 user를 전달하지 않아도 된다.
-		jdbcContextWithStatementStrategy(st);
+		);
 	}
 	
 	// 사용자 데이터 가져오기
@@ -67,10 +67,17 @@ public class UserDao {
 		return user;
 	}
 	
-	// 3-12 클라이언트 책임을 담당항 deleteAll() 메소드
+	// 3-20 익명 내부 클래스를 적용한 deleteAll() 메소드
 	public void deleteAll() throws SQLException {
-		StatementStrategy st = new DeleteAllStatement(); // 선정한 전략 클래스의 오브젝트 생성
-		jdbcContextWithStatementStrategy(st);  // 컨텍스트 호출. 전략 오브젝트 전달
+		jdbcContextWithStatementStrategy(
+			new StatementStrategy() {
+				@Override
+				public PreparedStatement makePreparedStatement(Connection c) 
+						throws SQLException {
+					return c.prepareStatement("DELETE FROM user");
+				}
+			}
+		);
 	}
 	
 	// 3-11 메소드로 분리한 try/catch/finally 컨텍스트 코드
