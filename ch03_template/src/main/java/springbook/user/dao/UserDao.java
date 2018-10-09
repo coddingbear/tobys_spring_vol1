@@ -12,25 +12,33 @@ import springbook.user.domain.User;
 
 /**
  * JDBC를 이용한 등록과 조회 기능이 있는 UserDao 클래스
- * 3.1.1 예외처리 기능을 갖춘 DAO
+ * 3.4 컨텍스트와 DI
  */
 public class UserDao {
 	private DataSource dataSource;
 	
-	public void setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
+	// 3-22 JdbcContext를 DI 받아서 사용하도록 만든 UserDao
+	private JdbcContext jdbcContext;
+	
+//	public void setJdbcContext(JdbcContext jdbcContext) { // JdbcContext를 DI 받도록 만든다.
+//		this.jdbcContext = jdbcContext;
+//	}
+	
+	public void setDataSource(DataSource dataSource) { 
+		this.jdbcContext = new JdbcContext();       // JdbcContext 생성(IoC)
+		this.jdbcContext.setDataSource(dataSource); // 의존 오브젝트 주입
+		this.dataSource = dataSource; // 아직 JdbcContext를 적용하지 않는 메소드를 위해 저장해둔다.
 	}
 	
-	// 3-18 AddStatement를 익명 내부 클래스로 전환
-	// 3-19 메소드 파라미터로 이전한 익명 내부 클래스
+	
 	public void add(final User user) throws SQLException {
-		jdbcContextWithStatementStrategy(
-			new StatementStrategy() { // 익명 내부 클래스는 구현하는 인터페이스를 생성자처럼 이용해서 오브젝트를 만든다.
+		this.jdbcContext.workWithStatementStrategy( // DI 받은 JdbcContext의 컨텍스트 메소드를 사용하도록 변경한다.
+			new StatementStrategy() {
 				@Override
 				public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
 					PreparedStatement ps = c.prepareStatement(
 							"INSERT INTO users (id, name, password) VALUES (?,?,?)");
-					ps.setString(1, user.getId()); // 로컬 클래스의 코드에서 외부의 메소드 로컬변수를 직접 접근할 수 있다.
+					ps.setString(1, user.getId());
 					ps.setString(2, user.getName());
 					ps.setString(3, user.getPassword());
 					
@@ -43,10 +51,8 @@ public class UserDao {
 	// 사용자 데이터 가져오기
 	public User get(String id) throws SQLException {
 
-		Connection c = dataSource.getConnection();
-		
-		PreparedStatement ps = c.prepareStatement(
-				"SELECT * FROM users WHERE id = ?");
+		Connection c = dataSource.getConnection();	
+		PreparedStatement ps = c.prepareStatement("SELECT * FROM users WHERE id = ?");
 		ps.setString(1, id);
 		
 		ResultSet rs = ps.executeQuery();
@@ -67,34 +73,17 @@ public class UserDao {
 		return user;
 	}
 	
-	// 3-20 익명 내부 클래스를 적용한 deleteAll() 메소드
+	// 3-22 jdbcContext를 DI 받아서 사용하도록 만든 UserDao
 	public void deleteAll() throws SQLException {
-		jdbcContextWithStatementStrategy(
+		this.jdbcContext.workWithStatementStrategy(
 			new StatementStrategy() {
 				@Override
 				public PreparedStatement makePreparedStatement(Connection c) 
 						throws SQLException {
-					return c.prepareStatement("DELETE FROM user");
+					return c.prepareStatement("DELETE FROM users");
 				}
 			}
 		);
-	}
-	
-	// 3-11 메소드로 분리한 try/catch/finally 컨텍스트 코드
-	public void jdbcContextWithStatementStrategy(StatementStrategy stmt) throws SQLException {
-		Connection c = null;
-		PreparedStatement ps = null;
-		
-		try {
-			c = dataSource.getConnection();
-			ps = stmt.makePreparedStatement(c);
-			ps.executeUpdate();
-		} catch (SQLException e) {
-			throw e;
-		} finally {
-			if(ps != null) try { ps.close(); } catch(SQLException e) {}
-			if(c != null)  try { c.close();  } catch(SQLException e) {}
-		}
 	}
 		
 	// 3-3 JDBC 예외 처리를 적용한 getCount() 메소드
