@@ -21,24 +21,10 @@ public class UserDao {
 		this.dataSource = dataSource;
 	}
 	
-	// 사용자 데이터 추가
+	// 3-15 user 정보를 AddStatement에 전달해주는 add() 메소드
 	public void add(User user) throws SQLException {
-		
-		Connection c = dataSource.getConnection();
-		
-		//2. SQL을 담은 Statement 또는 PreparedStatement 를 만든다.
-		PreparedStatement ps = c.prepareStatement(
-				"INSERT INTO users(id, name, password) VALUES(?,?,?)");
-		ps.setString(1, user.getId());
-		ps.setString(2,  user.getName());
-		ps.setString(3, user.getPassword());
-		
-		// 3. 만들어진 Statement를 실행한다.
-		ps.executeUpdate();
-		
-		// 4. 작업중에 생성된 Connection, Statement, ResultSet 리소스를 닫아 준다.
-		ps.close();
-		c.close();
+		StatementStrategy st = new AddStatement(user);
+		jdbcContextWithStatementStrategy(st);
 	}
 	
 	// 사용자 데이터 가져오기
@@ -72,22 +58,6 @@ public class UserDao {
 	public void deleteAll() throws SQLException {
 		StatementStrategy st = new DeleteAllStatement(); // 선정한 전략 클래스의 오브젝트 생성
 		jdbcContextWithStatementStrategy(st);  // 컨텍스트 호출. 전략 오브젝트 전달
-		/* 3-10 전략 패턴을 따라 DeleteAllStatement가 적용된 deleteAll()
-		Connection c = null;
-		PreparedStatement ps = null;
-		
-		try {
-			c = dataSource.getConnection();
-			StatementStrategy strategy = new DeleteAllStatement();
-			ps = strategy.makePreparedStatement(c);
-			ps.executeUpdate();
-		} catch (SQLException e) {
-			throw e;
-		} finally {
-			if(ps != null) try { ps.close(); } catch(SQLException e) {}
-			if(c != null)  try { c.close();  } catch(SQLException e) {}
-		}
-		*/
 	}
 	
 	// 3-11 메소드로 분리한 try/catch/finally 컨텍스트 코드
