@@ -3,6 +3,7 @@ package springbook.user.dao;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import java.sql.SQLException;
+import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -43,6 +44,35 @@ public class UserDaoTest {
 		
 	} // 각 테스트 메소드에 반복적으로 나타났던 코드를 제거하고 별도의 메소드로 옮긴다.
 
+	// 3-52 getAll()에 대한 테스트
+	@Test
+	public void getAll() throws Exception {
+		dao.deleteAll();
+		
+		List<User> users0 = dao.getAll();
+		assertThat(users0.size(), is(0));
+		
+		dao.add(user1); // Id: qyumee
+		List<User> users1 = dao.getAll();
+		assertThat(users1.size(), is(1));
+		checkSameUser(user1, users1.get(0));
+		
+		dao.add(user2); // Id: leegw700
+		List<User> users2 = dao.getAll();
+		assertThat(users2.size(), is(2));	
+		checkSameUser(user1, users1.get(0));
+		checkSameUser(user2, users2.get(1));
+		
+		dao.add(user3); // id: bumjin;
+		List<User> users3 = dao.getAll();
+		assertThat(users3.size(), is(3));	
+		checkSameUser(user1, users1.get(0));
+		checkSameUser(user2, users2.get(1));
+		checkSameUser(user2, users3.get(2));
+		
+		users3.forEach(System.out::println);
+	}
+		
 	@Test
 	public void addAndGet() throws SQLException { 		
 		dao.deleteAll();
@@ -89,6 +119,15 @@ public class UserDaoTest {
 		
 		dao.get("unkown_id"); // 이 메소드 실행 중에 예외가 발생해야 한다. 예외가 발생하지 않으면 테스트가 실패한다.
 	}
+
+	
+	// User 오브젝트의 내용을 비교하는 검증코드 테스트에서 반복적으로 사용되므로 분리해놓았다.
+	private void checkSameUser(User user1, User user2) {
+		assertThat(user1.getId(), is(user2.getId()));
+		assertThat(user1.getName(), is(user2.getName()));
+		assertThat(user1.getPassword(), is(user2.getPassword()));
+	}
+	
 	
 /* JUnit이 하나의 테스트 클래스를 가져와 테스트를 수행하는 방식은 다음과 같다.
   1. 테스트 클래스에서 @Test가 붙은 public이고 void형이며 파라미터가 없는 테스트 메소드를 모드 찾는다.
