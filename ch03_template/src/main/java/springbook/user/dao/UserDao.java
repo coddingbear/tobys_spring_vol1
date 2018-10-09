@@ -21,9 +21,22 @@ public class UserDao {
 		this.dataSource = dataSource;
 	}
 	
-	// 3-15 user 정보를 AddStatement에 전달해주는 add() 메소드
-	public void add(User user) throws SQLException {
-		StatementStrategy st = new AddStatement(user);
+	// 3-17 add() 메소드의 로컬 변수를 직접 사용하도록 수정한 AddStatement
+	public void add(final User user) throws SQLException {
+		class AddStatement implements StatementStrategy { // add() 메소드 내부에 선언된 로컬 클래스다.
+			@Override
+			public PreparedStatement makePreparedStatement(Connection c) 
+					throws SQLException {
+				PreparedStatement ps = c.prepareStatement(
+						"INSERT INTO users (id, name, password) VALUES (?,?,?)");
+				ps.setString(1, user.getId()); // 로컬 클래스의 코드에서 외부의 메소드 로컬변수를 직접 접근할 수 있다.
+				ps.setString(2, user.getName());
+				ps.setString(3, user.getPassword());
+				
+				return ps;
+			}
+		}
+		StatementStrategy st = new AddStatement(); // 생성자 파라미터로 user를 전달하지 않아도 된다.
 		jdbcContextWithStatementStrategy(st);
 	}
 	
