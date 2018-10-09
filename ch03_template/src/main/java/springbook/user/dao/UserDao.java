@@ -12,7 +12,7 @@ import springbook.user.domain.User;
 
 /**
  * JDBC를 이용한 등록과 조회 기능이 있는 UserDao 클래스
- * 3.4 컨텍스트와 DI
+ * 3.5 템플릿과 콜백
  */
 public class UserDao {
 	private DataSource dataSource;
@@ -73,17 +73,9 @@ public class UserDao {
 		return user;
 	}
 	
-	// 3-22 jdbcContext를 DI 받아서 사용하도록 만든 UserDao
+	// 3-29 jdbcContext로 옮긴 executeSql()을 사용하는 deleteAll()
 	public void deleteAll() throws SQLException {
-		this.jdbcContext.workWithStatementStrategy(
-			new StatementStrategy() {
-				@Override
-				public PreparedStatement makePreparedStatement(Connection c) 
-						throws SQLException {
-					return c.prepareStatement("DELETE FROM users");
-				}
-			}
-		);
+		this.jdbcContext.executeSql("DELETE FROM users");
 	}
 		
 	// 3-3 JDBC 예외 처리를 적용한 getCount() 메소드
