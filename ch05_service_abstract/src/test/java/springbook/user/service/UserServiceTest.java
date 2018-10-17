@@ -1,6 +1,8 @@
 package springbook.user.service;
 
 import static org.junit.Assert.*;
+import static springbook.user.service.UserService.MIN_LOGCOUNT_FOR_SIVER;
+import static springbook.user.service.UserService.MIN_RECOMMEND_FOR_GOLD;
 
 import java.util.Arrays;
 import java.util.List;
@@ -11,7 +13,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
 import springbook.user.dao.UserDao;
 import springbook.user.domain.Level;
 import springbook.user.domain.User;
@@ -34,11 +35,11 @@ public class UserServiceTest {
 	@Before
 	public void setUp() throws Exception {
 		users = Arrays.asList( // 배열을 리스트로 만들어주는 편리한 메소드, 배열을 가변인자로 넣어주면 더욱 편리하다.
-			new User("bumjin",   "박범진", "p1", Level.BASIC,  49, 0),
-			new User("joytouch", "강명성", "p2", Level.BASIC,  50, 0),
-			new User("erwins",   "신승한", "p3", Level.SILVER, 60, 29),
-			new User("madnitel", "이상호", "p4", Level.SILVER, 60, 30),
-			new User("green",    "오민규", "p5", Level.GOLD,  100, 100)
+			new User("bumjin",   "박범진", "p1", Level.BASIC,  MIN_LOGCOUNT_FOR_SIVER-1, 0),
+			new User("joytouch", "강명성", "p2", Level.BASIC,  MIN_LOGCOUNT_FOR_SIVER, 0),
+			new User("erwins",   "신승한", "p3", Level.SILVER, 60, MIN_RECOMMEND_FOR_GOLD-1),
+			new User("madnitel", "이상호", "p4", Level.SILVER, 60, MIN_RECOMMEND_FOR_GOLD),
+			new User("green",    "오민규", "p5", Level.GOLD,  100, Integer.MAX_VALUE)
 		);
 	}
 
@@ -48,7 +49,7 @@ public class UserServiceTest {
 		assertNotNull(this.userService);
 	}
 
-	// 5-20 사용자 레벨 업그레이드 테스트
+	// 5-30 개선한 레벨 업그레이드 테스트
 	@Test
 	public void upgradeLevels() {
 		userDao.deleteAll();
@@ -57,18 +58,23 @@ public class UserServiceTest {
 		userService.upgradeLevels();
 		
 		// 각 사용자별로 업그레이드 후의 예상 레벨을 검증한다.
-		checkLevel(users.get(0), Level.BASIC);
-		checkLevel(users.get(1), Level.SILVER);
-		checkLevel(users.get(2), Level.SILVER);
-		checkLevel(users.get(3), Level.GOLD);
-		checkLevel(users.get(4), Level.GOLD);
+		checkLevelUpgraded(users.get(0), false);
+		checkLevelUpgraded(users.get(1), true);
+		checkLevelUpgraded(users.get(2), false);
+		checkLevelUpgraded(users.get(3), true);
+		checkLevelUpgraded(users.get(4), false);
 		
 	}
 	
 	// DB에서 사용자 정보를 가져와 레벨을 확인하는 코드가 중복되므로 헬퍼 메소드로 분리했다.
-	private void checkLevel(User user, Level expectedLevel) {
+	private void checkLevelUpgraded(User user, boolean upgraded) {
 		User userUpdate = userDao.get(user.getId());
-		assertEquals(userUpdate.getLevel(), expectedLevel);
+		if(upgraded) {
+			assertEquals(userUpdate.getLevel(), user.getLevel().nextLevel()); // 업그레이드가 일어났는지 확인
+		}
+		else { 
+			assertEquals(userUpdate.getLevel(), user.getLevel()); // 업그레이드가 일어나지 않았는지 확인
+		}
 	}
 	
 	// 5-21 add() 메소드의 테스트
