@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	
+	<!-- dataSource 빈 -->
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<!-- 1-47 XML을 이용한 DB 연결 정보 -->
+		<property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+		<property name="url" value="jdbc:mysql://localhost:3306/springbook"/>
+		<property name="username" value="springuser" />
+		<property name="password" value="springpass" />
+	</bean>
+	
+	<!-- 5-15 userService 빈 설정 -->
+	<bean id="userService" class="springbook.user.service.UserService">
+		<property name="userDao" ref="userDao"/>
+	</bean>
+
+	<bean id="userDao" class="springbook.user.dao.UserDaoJdbc">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+</beans>
